@@ -23,19 +23,18 @@ describe('knex_cleaner', function() {
     describe(dbTestValues.client, function() {
 
       beforeEach(function() {
-        return BPromise.all([
-          dbTestValues.knex.schema.createTable('test_1', function (table) {
-            table.increments();
-            table.string('name');
-            table.timestamps();
-          }),
-          dbTestValues.knex.schema.createTable('test_2', function (table) {
+        return dbTestValues.knex.schema.createTableIfNotExists('test_1', function (table) {
+          table.increments();
+          table.string('name');
+          table.timestamps();
+        }).then(function() {
+          return dbTestValues.knex.schema.createTableIfNotExists('test_2', function (table) {
             table.increments();
             table.string('name');
             table.integer('test_1_id').unsigned().references('test_1.id');
             table.timestamps();
-          })
-        ]).then(function() {
+          });
+        }).then(function() {
           return BPromise.all([
             dbTestValues.knex('test_1').insert({name: Faker.company.companyName()}),
             dbTestValues.knex('test_1').insert({name: Faker.company.companyName()}),
